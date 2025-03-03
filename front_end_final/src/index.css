@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+
+.btn-blue {
+    @apply flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition;
+}
+
+.btn-green {
+    @apply flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 transition;
+}
+
+.btn-yellow {
+    @apply flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 transition;
+}
+
+.btn-red {
+    @apply flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition;
+}
+
+.btn-gray {
+    @apply flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600 transition;
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { useDocumentStorageProgram } from "./solanaService";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -8,9 +8,14 @@ export const useInitializeUserAccount = () => {
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const initializationAttempted = useRef(false);
 
   const initializeUser = useCallback(async () => {
-    if (!program || !wallet || initialized) return; // Prevent re-initialization
+    // Prevent multiple initialization attempts
+    if (!program || !wallet || initializationAttempted.current) return;
+    
+    // Mark that we've attempted initialization
+    initializationAttempted.current = true;
     setLoading(true);
 
     const [userDocumentsPDA] = PublicKey.findProgramAddressSync(
@@ -46,11 +51,11 @@ export const useInitializeUserAccount = () => {
     }
 
     setLoading(false);
-  }, [program, wallet, initialized]); // Dependency array ensures it doesn't run unnecessarily
+  }, [program, wallet]); // Remove initialized from dependencies
 
   useEffect(() => {
     initializeUser();
-  }, [initializeUser]); // Runs only when dependencies change
+  }, [initializeUser]);
 
   return { initialized, loading };
 };

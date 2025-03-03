@@ -1,12 +1,17 @@
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { authState } from '../state/authAtom';
 import CryptoJS from 'crypto-js';
 import { useState } from 'react';
 import { AiOutlineCopy } from 'react-icons/ai';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
+import { Initializedstate } from '../state/initialized';
+
 export default function TopBar() {
+  
+
+  const value = useRecoilValue(Initializedstate)
   const { connected, publicKey, signMessage, disconnect } = useWallet();
   const [auth, setAuth] = useRecoilState(authState);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -43,7 +48,17 @@ export default function TopBar() {
       {/* Logo */}
       <div className="text-lg font-bold">MyLogo</div>
 
+
       <div className="flex items-center gap-4">
+        {auth.isAuthenticated? <div>
+          {value.isloading ? (
+            <p>Initializing your account...</p>
+          ) : value.isInitialized ? (
+            <p>Account is ready! You can start uploading documents.</p>
+          ) : (
+            <p>Please connect your wallet.</p>
+          )}
+        </div> : null}
         {!connected ? (
           <WalletMultiButton className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md" />
         ) : (
@@ -70,11 +85,10 @@ export default function TopBar() {
             {/* Authenticate / Logout Button */}
             <button
               onClick={handleAuth}
-              className={`px-4 py-2 rounded-md ${
-                auth.isAuthenticated
+              className={`px-4 py-2 rounded-md ${auth.isAuthenticated
                   ? 'bg-red-500 hover:bg-red-600'
                   : 'bg-blue-500 hover:bg-blue-600'
-              } text-white`}
+                } text-white`}
             >
               {auth.isAuthenticated ? 'Logout' : 'Authenticate'}
             </button>

@@ -14,7 +14,7 @@ export default function Upload() {
   const [encryptedCID, setEncryptedCID] = useState<{ encryptedData: string; iv: string } | null>(null);
 
   const auth = useRecoilValue(authState);
-  const { uploadDocument, loading } = useUploadDocument(); // ✅ Correct way to use the hook
+  const { uploadDocument, loading } = useUploadDocument();
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
   const ALLOWED_TYPES = ["application/pdf", "image/png", "image/jpeg", "text/plain"];
@@ -82,7 +82,6 @@ export default function Upload() {
       const encryptedData = encryptCID(newCid, auth.signature);
       setEncryptedCID(encryptedData);
 
-      // ✅ Corrected way to call the upload function
       const result = await uploadDocument(fileName, fileType, encryptedData.encryptedData, encryptedData.iv);
 
       if (result.success) {
@@ -103,44 +102,82 @@ export default function Upload() {
   }, []);
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg">
-      <h2 className="text-lg font-bold mb-3">📤 Upload Document</h2>
-      <input
-        type="file"
-        accept=".pdf, .png, .jpeg, .txt"
-        onChange={handleFileChange}
-        className="mb-3 w-full p-2 border border-gray-700 rounded bg-gray-800 text-white"
-      />
-      {file && (
-        <input
-          type="text"
-          value={fileName}
-          onChange={(e) => setFileName(e.target.value)}
-          placeholder="Enter custom file name"
-          className="mb-3 w-full p-2 border border-gray-700 rounded bg-gray-800 text-white"
-        />
-      )}
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      {file && (
-        <div className="bg-gray-800 p-3 rounded-lg mt-3">
-          <p className="truncate font-semibold">{fileName}.{fileType.split("/")[1]}</p>
-          <p className="text-xs text-gray-400">Type: {fileType}</p>
-          <p className="text-xs text-gray-400">Size: {(file.size / 1024).toFixed(2)} KB</p>
+    <div className="w-full">
+      <div className=" rounded-t-lg px-6 py-4 bg-blue-200 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-black">📤 Document Upload</h2>
+      </div>
+      
+      <div className="bg-white rounded-b-lg shadow-lg p-6">
+        <div className="space-y-4">
+          {/* File input section */}
+          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+            <p className="text-sm text-blue-800 mb-2">Select document to upload</p>
+            <input
+              type="file"
+              accept=".pdf, .png, .jpeg, .txt"
+              onChange={handleFileChange}
+              className="w-full p-2 border border-blue-200 rounded bg-white text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          
+          {/* File details section */}
+          {file && (
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+              <div className="flex flex-col space-y-3">
+                <div>
+                  <label className="text-sm text-blue-800 block mb-1">File name</label>
+                  <input
+                    type="text"
+                    value={fileName}
+                    onChange={(e) => setFileName(e.target.value)}
+                    placeholder="Enter custom file name"
+                    className="w-full p-2 border border-blue-200 rounded bg-white text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-blue-700">Type: <span className="text-blue-900 font-medium">{fileType}</span></span>
+                  <span className="text-blue-700">Size: <span className="text-blue-900 font-medium">{(file.size / 1024).toFixed(2)} KB</span></span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Error message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+          
+          {/* Upload success message */}
+          {cid && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="text-green-600 text-sm font-medium">✅ File uploaded successfully!</p>
+              <p className="text-xs text-green-700 mt-1 truncate">CID: {cid}</p>
+            </div>
+          )}
+          
+          {/* Upload button */}
+          <button
+            onClick={handleUpload}
+            disabled={uploading || loading || !file}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 disabled:bg-blue-100 disabled:text-blue-400 flex justify-center items-center"
+          >
+            {uploading || loading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Uploading...
+              </span>
+            ) : (
+              "Upload Document"
+            )}
+          </button>
         </div>
-      )}
-      <button
-        onClick={handleUpload}
-        disabled={uploading || loading}
-        className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md disabled:bg-gray-500"
-      >
-        {uploading || loading ? "Uploading..." : "Upload"}
-      </button>
-      {cid && (
-        <div className="mt-4 p-3 bg-gray-800 rounded-lg">
-          <p className="text-sm text-green-400">✅ File uploaded successfully!</p>
-          <p className="text-xs truncate">CID: {cid}</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
